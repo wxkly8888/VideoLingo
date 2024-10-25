@@ -1,0 +1,22 @@
+requests
+pandas
+jupyter
+openai
+openpyxl
+spacy
+yt-dlp
+pyyaml
+pydub
+librosa
+json-repair
+resampy
+streamlit
+
+# for create video
+opencv-python
+moviepy
+# for whisperX api
+replicate
+
+# for azure tts
+azure-cognitiveservices-speech
