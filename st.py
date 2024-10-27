@@ -47,21 +47,21 @@ def process_text():
     video_file = step1_ytdlp.find_video_files()
     
     with st.spinner(gls("using_whisper_transcription")):
-        step2_whisper.transcribe(video_file)
-    with st.spinner(gls("splitting_long_sentences")):  
-        step3_1_spacy_split.split_by_spacy()
-        step3_2_splitbymeaning.split_sentences_by_meaning()
-    with st.spinner(gls("summarizing_and_translating")):
-        step4_1_summarize.get_summary()
-        from config import PAUSE_BEFORE_TRANSLATE
-        if PAUSE_BEFORE_TRANSLATE:
-            input("⚠️ PAUSE_BEFORE_TRANSLATE. Go to `output/log/terminology.json` to edit terminology. Then press ENTER to continue...")
-        step4_2_translate_all.translate_all()
-    with st.spinner(gls("processing_aligning_subtitles")): 
-        step5_splitforsub.split_for_sub_main()
-        step6_generate_final_timeline.align_timestamp_main()
-    with st.spinner(gls("merging_subtitles_to_video")):
-        step7_merge_sub_to_vid.merge_subtitles_to_video()
+        step2_whisper.transcribe_audio_to_srt("output/audio/raw_full_audio.wav")
+    # with st.spinner(gls("splitting_long_sentences")):  
+    #     step3_1_spacy_split.split_by_spacy()
+    #     step3_2_splitbymeaning.split_sentences_by_meaning()
+    # with st.spinner(gls("summarizing_and_translating")):
+    #     step4_1_summarize.get_summary()
+    #     from config import PAUSE_BEFORE_TRANSLATE
+    #     if PAUSE_BEFORE_TRANSLATE:
+    #         input("⚠️ PAUSE_BEFORE_TRANSLATE. Go to `output/log/terminology.json` to edit terminology. Then press ENTER to continue...")
+    #     step4_2_translate_all.translate_all()
+    # with st.spinner(gls("processing_aligning_subtitles")): 
+    #     step5_splitforsub.split_for_sub_main()
+    #     step6_generate_final_timeline.align_timestamp_main()
+    # with st.spinner(gls("merging_subtitles_to_video")):
+    #     step7_merge_sub_to_vid.merge_subtitles_to_video()
     
     st.success(gls("subtitle_processing_complete"))
     st.balloons()

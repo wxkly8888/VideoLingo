@@ -34,6 +34,8 @@ def convert_video_to_audio(input_file: str) -> str:
 
     return audio_file
 
+
+
 def split_audio(audio_file: str, target_duration: int = 20*60, window: int = 60) -> List[Tuple[float, float]]:
     print("🔪 Splitting audio into segments...")
     
@@ -55,7 +57,7 @@ def split_audio(audio_file: str, target_duration: int = 20*60, window: int = 60)
         
         ffmpeg_cmd = ['ffmpeg', '-y', '-i', audio_file, '-ss', str(window_start), '-to', str(window_end), '-af', 'silencedetect=n=-30dB:d=0.5', '-f', 'null', '-']
         output = subprocess.run(ffmpeg_cmd, capture_output=True, text=True).stderr
-        
+        print("ffmpeg output: ", output)
         # Parse silence detection output
         silence_end_times = [float(line.split('silence_end: ')[1].split(' ')[0]) for line in output.split('\n') if 'silence_end' in line]
         
@@ -102,6 +104,7 @@ def transcribe_segment(audio_file: str, start: float, end: float) -> Dict:
     print(f"📊 Segment size: {segment_size:.2f} MB")
 
     result = transcribe_audio(audio_base64)
+    print("transcribe_audio result: ", result)
     
     # Delete segment file
     os.remove(segment_file)
@@ -213,9 +216,49 @@ def save_language(language: str):
     os.makedirs('output/log', exist_ok=True)
     with open('output/log/transcript_language.json', 'w', encoding='utf-8') as f:
         json.dump({"language": language}, f, ensure_ascii=False, indent=4)
-    
+
+def transcribe_audio_file(audio_file: str):
+    # step1 split audio
+    segments = split_audio(audio_file)
+    # step2 Transcribe audio
+    all_results = []
+    for start, end in segments:
+        print("start and end: ", start, end)
+        result = transcribe_segment(audio_file, start, end)
+        result['time_offset'] = start  # Add time offset to the result
+        all_results.append(result) 
+       # step4 Combine results
+    combined_result = {
+        'segments': [],
+        'detected_language': all_results[0]['detected_language']
+    }    
+    for result in all_results:
+        for segment in result['segments']:
+            segment['start'] += result['time_offset']
+            segment['end'] += result['time_offset']
+        combined_result['segments'].extend(result['segments'])
+    saveResultsToSrt(combined_result['segments'])    
+
+
+def saveResultsToSrt(combined_result: Dict):
+    def format_time(seconds):
+        millis = int((seconds - int(seconds)) * 1000)
+        hours, remainder = divmod(int(seconds), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        return f"{hours:02}:{minutes:02}:{seconds:02},{millis:03}"
+
+    with open('output/log/transcribe.srt', 'w', encoding='utf-8') as srt_file:
+        for index, entry in enumerate(combined_result, start=1):
+            start_time = format_time(entry['start'])
+            end_time = format_time(entry['end'])
+            text = entry['text']
+            srt_file.write(f"{index}\n")
+            srt_file.write(f"{start_time} --> {end_time}\n")
+            srt_file.write(f"{text}\n\n")
+
+# step2 Extract audio
 def transcribe(video_file: str):
-    if not os.path.exists("output/log/cleaned_chunks.xlsx"):
+    # if not os.path.exists("output/log/cleaned_chunks.xlsx"):
         audio_file = convert_video_to_audio(video_file)
         print("!  Warning: This method does not apply UVR5 processing to the audio. Not recommended for videos with loud BGM.")
         # step2 Extract audio
@@ -224,7 +267,9 @@ def transcribe(video_file: str):
         # step3 Transcribe audio
         all_results = []
         for start, end in segments:
-            result = transcribe_segment(audio_file, start, end)
+            print("start and end: ", start, end)
+            result = transcribe_segment(audio_file, start, end ,True)
+            print("result: ", result)
             result['time_offset'] = start  # Add time offset to the result
             all_results.append(result)
         
@@ -250,8 +295,8 @@ def transcribe(video_file: str):
         # step6 Process transcription
         df = process_transcription(combined_result)
         save_results(df)
-    else:
-        print("📊 Transcription results already exist, skipping transcription step.")
+    # else:
+        # print("📊 Transcription results already exist, skipping transcription step.")
 
 if __name__ == "__main__":
     from core.step1_ytdlp import find_video_files
