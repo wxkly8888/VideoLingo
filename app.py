@@ -23,8 +23,9 @@ def audio_to_text():
     if file:
         file_path = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(file_path)
-        step2_whisper.transcribe_audio_to_srt(file_path)
-        return jsonify({"message": "File successfully uploaded", "file_path": file_path}), 200
-
+        file_path = step2_whisper.transcribe_audio_to_srt(file_path)
+        # Generate a URL for the client to download the file
+        download_url = request.host_url + 'download/' + os.path.basename(file_path)
+        return jsonify({"message": "File successfully uploaded",  "download_url": download_url}), 200
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

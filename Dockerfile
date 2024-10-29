@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-0
 # 安装必要的依赖项
 RUN pip install -r requirements.txt
-
+# 确保文件夹存在
+RUN mkdir -p output/audio/uploads
 # 运行 install.py 脚本
 RUN python installServer.py
 
