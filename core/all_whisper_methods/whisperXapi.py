@@ -106,7 +106,10 @@ def transcribe_segment(audio_file: str, start: float, end: float) -> Dict:
     print(f"📊 Segment size: {segment_size:.2f} MB")
 
     result = transcribe_audio(audio_base64)
-    print("transcribe_audio result: ", result)
+    # #load data from output/log/api.json
+    # with open('output/log/api.json', 'r', encoding='utf-8') as f:
+    #     api_data = json.load(f)
+    # print("transcribe_audio result: ", result)
     
     # Delete segment file
     os.remove(segment_file)
@@ -219,7 +222,7 @@ def save_language(language: str):
     with open('output/log/transcript_language.json', 'w', encoding='utf-8') as f:
         json.dump({"language": language}, f, ensure_ascii=False, indent=4)
 
-def transcribe_audio_file(audio_file: str):
+def transcribe_audio_file(audio_file: str)->str:
     # step1 split audio
     segments = split_audio(audio_file)
     # step2 Transcribe audio
@@ -248,15 +251,15 @@ def generate_random_string(length):
     random_string = ''.join(random.choices(characters, k=length))
     return random_string
 
-def saveResultsToSrt(combined_result: Dict)-> str:
+def saveResultsToSrt(combined_result: Dict) -> str:
     def format_time(seconds):
         millis = int((seconds - int(seconds)) * 1000)
         hours, remainder = divmod(int(seconds), 3600)
         minutes, seconds = divmod(remainder, 60)
         return f"{hours:02}:{minutes:02}:{seconds:02},{millis:03}"
-    #generate a random string
-    random_string = generate_random_string(10)
-    srt_file = 'output/log/{random_string}.srt'
+    
+    random_string = generate_random_string(10)  # Generate a random string
+    srt_file = f'output/log/{random_string}.srt'  # Use the random string in the file name
     with open(srt_file, 'w', encoding='utf-8') as srt_file:
         for index, entry in enumerate(combined_result, start=1):
             start_time = format_time(entry['start'])
@@ -265,7 +268,8 @@ def saveResultsToSrt(combined_result: Dict)-> str:
             srt_file.write(f"{index}\n")
             srt_file.write(f"{start_time} --> {end_time}\n")
             srt_file.write(f"{text}\n\n")
-    return srt_file        
+    
+    return srt_file.name     
 
 # step2 Extract audio
 def transcribe(video_file: str):
