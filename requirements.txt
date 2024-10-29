@@ -11,6 +11,7 @@ librosa
 json-repair
 resampy
 streamlit
+flask
 
 # for create video
 opencv-python

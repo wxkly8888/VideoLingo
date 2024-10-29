@@ -11,6 +11,8 @@ from moviepy.editor import AudioFileClip
 import librosa
 import soundfile as sf
 import time
+import random
+import string
 
 def convert_video_to_audio(input_file: str) -> str:
     audio_dir = 'output/audio'
@@ -237,17 +239,25 @@ def transcribe_audio_file(audio_file: str):
             segment['start'] += result['time_offset']
             segment['end'] += result['time_offset']
         combined_result['segments'].extend(result['segments'])
-    saveResultsToSrt(combined_result['segments'])    
+    file_path = saveResultsToSrt(combined_result['segments'])
+    return file_path
 
 
-def saveResultsToSrt(combined_result: Dict):
+def generate_random_string(length):
+    characters = string.ascii_letters + string.digits
+    random_string = ''.join(random.choices(characters, k=length))
+    return random_string
+
+def saveResultsToSrt(combined_result: Dict)-> str:
     def format_time(seconds):
         millis = int((seconds - int(seconds)) * 1000)
         hours, remainder = divmod(int(seconds), 3600)
         minutes, seconds = divmod(remainder, 60)
         return f"{hours:02}:{minutes:02}:{seconds:02},{millis:03}"
-
-    with open('output/log/transcribe.srt', 'w', encoding='utf-8') as srt_file:
+    #generate a random string
+    random_string = generate_random_string(10)
+    srt_file = 'output/log/{random_string}.srt'
+    with open(srt_file, 'w', encoding='utf-8') as srt_file:
         for index, entry in enumerate(combined_result, start=1):
             start_time = format_time(entry['start'])
             end_time = format_time(entry['end'])
@@ -255,6 +265,7 @@ def saveResultsToSrt(combined_result: Dict):
             srt_file.write(f"{index}\n")
             srt_file.write(f"{start_time} --> {end_time}\n")
             srt_file.write(f"{text}\n\n")
+    return srt_file        
 
 # step2 Extract audio
 def transcribe(video_file: str):

@@ -19,9 +19,9 @@ def transcribe(video_file: str):
         from core.all_whisper_methods.whisperXapi import transcribe as ts
     ts(video_file)
 
-def transcribe_audio_to_srt(audio_file: str):
+def transcribe_audio_to_srt(audio_file: str)->str:
     from core.all_whisper_methods.whisperXapi import transcribe_audio_file as ts
-    ts(audio_file)
+    return ts(audio_file)
 
 if __name__ == "__main__":
     from core.step1_ytdlp import find_video_files
