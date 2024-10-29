@@ -9,7 +9,7 @@ COPY . .
 RUN pip install -r requirements.txt
 
 # 运行 install.py 脚本
-RUN python install.py
+RUN python installServer.py
 
 # 运行 Cloud Run 服务的入口
-CMD ["python", "installServer.py"]
+CMD ["python", "app.py"]
