@@ -12,4 +12,4 @@ RUN pip install -r requirements.txt
 RUN python install.py
 
 # 运行 Cloud Run 服务的入口
-CMD ["python", "app.py"]
+CMD ["python", "installServer.py"]
