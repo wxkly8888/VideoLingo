@@ -8,6 +8,9 @@ COPY . .
 RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     libglib2.0-0
+# Install ffmpeg
+RUN apt-get update && apt-get install -y ffmpeg
+
 # 安装必要的依赖项
 RUN pip install -r requirements.txt
 # 确保文件夹存在
