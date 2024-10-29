@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 import os
-from st_components.imports_and_utils import *
+from core import step2_whisper
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'output/audio/uploads'
